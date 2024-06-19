@@ -14,6 +14,10 @@ class FileTodoDataSource(
     private val type = object : TypeToken<List<Todo>>() {}.type
 
     init {
+        if (!file.parentFile.exists()) {
+            file.parentFile.mkdirs()
+        }
+
         if (!file.exists()) {
             file.createNewFile()
             file.writeText(gson.toJson(emptyList<Todo>()))
@@ -41,6 +45,16 @@ class FileTodoDataSource(
         return readFromFile()
     }
 
+    override fun getTodoById(id: Long): Result<Todo, TodoError> {
+        val todos = readFromFile()
+        val todoIndex = todos.indexOfFirst { it.id == id }
+        return if (todoIndex == -1) {
+            Result.Error(TodoError.NON_EXISTENT_ID)
+        } else {
+            Result.Success(todos[todoIndex])
+        }
+    }
+
     override fun completeTodo(id: Long) {
         val todo = readFromFile().toMutableList()
         val index = todo.indexOfFirst { it.id == id }
@@ -51,12 +65,13 @@ class FileTodoDataSource(
         }
     }
 
-    override fun removeTodo(id: Long): Result<Unit, TodoError> {
+    override fun removeTodo(id: Long): Result<Todo, TodoError> {
         val todos = readFromFile().toMutableList()
-        val isTodoRemoved = todos.removeIf { it.id == id }
+        val todoToRemove = todos.find { it.id == id }
+        val isTodoRemoved = todos.remove(todoToRemove)
         return if (isTodoRemoved) {
             writeToFile(todos)
-            Result.Success(Unit)
+            Result.Success(todoToRemove!!)
         } else {
             Result.Error(TodoError.NON_EXISTENT_ID)
         }

@@ -2,14 +2,11 @@ import data.FileTodoDataSource
 import data.InMemoryTodoDataSource
 import data.LocalTodoRepository
 import domain.TodoError
-import domain.map
+import domain.model.Todo
 import domain.onError
 import domain.onSuccess
 import domain.repository.TodoRepository
-import domain.usecase.AddTodoUseCase
-import domain.usecase.CompleteTodoUseCase
-import domain.usecase.GetTodosUseCase
-import domain.usecase.RemoveTodoUseCase
+import domain.usecase.*
 import java.io.File
 
 fun main() {
@@ -19,6 +16,7 @@ fun main() {
 
     val addTodoUseCase = AddTodoUseCase(todoRepository)
     val getTodosUseCase = GetTodosUseCase(todoRepository)
+    val getTodoByIdUseCase = GetTodoByIdUseCase(todoRepository)
     val removeTodoUseCase = RemoveTodoUseCase(todoRepository)
     val completeTodoUseCase = CompleteTodoUseCase(todoRepository)
 
@@ -33,17 +31,17 @@ fun main() {
                 println("Enter description:")
                 val description = readlnOrNull().orEmpty()
                 val newTodo = addTodoUseCase(description)
-                println("Added: $newTodo")
+                println("Added")
+                showTodo(newTodo)
             }
 
             2 -> {
                 println("Enter ID of todo to remove:")
                 val id = readlnOrNull()?.toLongOrNull()
                 id?.run {
-                    removeTodoUseCase(id).map {
-
-                    }.onSuccess {
-                        println("removed todo with ID: $id")
+                    removeTodoUseCase(id).onSuccess {
+                        println("Todo removed")
+                        showTodo(it)
                     }.onError {
                         when (it) {
                             TodoError.NON_EXISTENT_ID -> println("Invalid ID")
@@ -67,16 +65,7 @@ fun main() {
             4 -> {
                 val todos = getTodosUseCase()
                 todos.ifEmpty { println("No saved todos") }
-                todos.forEach {
-                    println(
-                        """
-                        ID: ${it.id}
-                        Text: ${it.description}
-                        IsCompleted: ${it.isCompleted}
-                        ==============================
-                    """.trimIndent()
-                    )
-                }
+                todos.forEach { showTodo(it)}
             }
 
             5 -> return
@@ -84,4 +73,15 @@ fun main() {
             else -> println("Invalid option")
         }
     }
+}
+
+private fun showTodo(todo: Todo) {
+    println(
+        """
+        ID: ${todo.id}
+        Text: ${todo.description}
+        IsCompleted: ${todo.isCompleted}
+        ==============================
+        """.trimIndent()
+    )
 }

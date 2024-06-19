@@ -16,11 +16,15 @@ class LocalTodoRepository(
         return localTodoDataSource.getAllTodos()
     }
 
+    override fun getTodoById(id: Long): Result<Todo, TodoError> {
+        return localTodoDataSource.getTodoById(id)
+    }
+
     override fun completeTodo(id: Long) {
         localTodoDataSource.completeTodo(id)
     }
 
-    override fun removeTodo(id: Long): Result<Unit, TodoError> {
+    override fun removeTodo(id: Long): Result<Todo, TodoError> {
         return localTodoDataSource.removeTodo(id)
     }
 }

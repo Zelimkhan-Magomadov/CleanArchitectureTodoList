@@ -5,10 +5,10 @@ import domain.TodoError
 import domain.model.Todo
 import domain.repository.TodoRepository
 
-class RemoveTodoUseCase(
+class GetTodoByIdUseCase(
     private val todoRepository: TodoRepository
 ) {
     operator fun invoke(id: Long): Result<Todo, TodoError> {
-        return todoRepository.removeTodo(id)
+        return todoRepository.getTodoById(id)
     }
 }

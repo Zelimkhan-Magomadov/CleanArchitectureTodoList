@@ -20,10 +20,3 @@ inline fun <D, E : RootError> Result<D, E>.onError(action: (E) -> Unit): Result<
     }
     return this
 }
-
-inline fun <D, E : RootError, R> Result<D, E>.map(transform: (D) -> R): Result<R, E> {
-    return when (this) {
-        is Result.Success -> Result.Success(transform(this.data))
-        is Result.Error -> Result.Error(this.error)
-    }
-}

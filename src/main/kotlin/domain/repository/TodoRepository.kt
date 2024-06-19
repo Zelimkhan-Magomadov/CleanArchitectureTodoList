@@ -7,6 +7,7 @@ import domain.TodoError
 interface TodoRepository {
     fun addTodo(todo: Todo): Todo
     fun getAllTodos(): List<Todo>
+    fun getTodoById(id: Long): Result<Todo, TodoError>
     fun completeTodo(id: Long)
-    fun removeTodo(id: Long): Result<Unit, TodoError>
+    fun removeTodo(id: Long): Result<Todo, TodoError>
 }

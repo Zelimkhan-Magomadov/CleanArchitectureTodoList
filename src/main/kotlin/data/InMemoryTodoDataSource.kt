@@ -8,14 +8,23 @@ class InMemoryTodoDataSource : TodoDataSource {
     private val todos = mutableListOf<Todo>()
     private var nextId = 1L
 
-    override fun addTodo(todoItem: Todo): Todo {
-        val newItem = todoItem.copy(id = nextId++)
+    override fun addTodo(todo: Todo): Todo {
+        val newItem = todo.copy(id = nextId++)
         todos.add(newItem)
         return newItem
     }
 
     override fun getAllTodos(): List<Todo> {
         return todos.toList()
+    }
+
+    override fun getTodoById(id: Long): Result<Todo, TodoError> {
+        val todoIndex = todos.indexOfFirst { it.id == id }
+        return if (todoIndex == -1) {
+            Result.Error(TodoError.NON_EXISTENT_ID)
+        } else {
+            Result.Success(todos[todoIndex])
+        }
     }
 
     override fun completeTodo(id: Long) {
@@ -26,10 +35,11 @@ class InMemoryTodoDataSource : TodoDataSource {
         }
     }
 
-    override fun removeTodo(id: Long): Result<Unit, TodoError> {
-        val isRemoved = todos.removeIf { it.id == id }
+    override fun removeTodo(id: Long): Result<Todo, TodoError> {
+        val todoToRemove = todos.find { it.id == id }
+        val isRemoved = todos.remove(todoToRemove)
         return if (isRemoved) {
-            Result.Success(Unit)
+            Result.Success(todoToRemove!!)
         } else {
             Result.Error(TodoError.NON_EXISTENT_ID)
         }
